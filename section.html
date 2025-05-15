@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cálculo Numérico - Métodos e Aplicações</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --primary: #007BFF;
+      --dark: #0056b3;
+      --light-bg: #f8f9fa;
+      --white: #ffffff;
+      --gray: #6c757d;
+      --highlight: #ffc107;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--light-bg);
+      color: #212529;
+      line-height: 1.6;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      background: linear-gradient(90deg, #007BFF, #3399ff);
+      color: var(--white);
+      padding: 2rem 1rem;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    nav {
+      background: var(--dark);
+      text-align: center;
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 999;
+    }
+
+    nav a {
+      color: var(--white);
+      margin: 0 1.2rem;
+      text-decoration: none;
+      font-weight: bold;
+      transition: color 0.3s;
+      cursor: pointer;
+    }
+
+    nav a:hover {
+      color: var(--highlight);
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+      max-width: 1000px;
+      margin: auto;
+      min-height: 60vh;
+    }
+
+    section {
+      background: var(--white);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      pointer-events: none;
+      transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+      width: 100%;
+    }
+
+    section.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: all;
+    }
+
+    h2::before {
+      content: "\1F4C8 ";
+    }
+
+    h2 {
+      color: var(--primary);
+      margin-bottom: 1rem;
+      font-size: 1.8rem;
+    }
+
+    p {
+      margin-bottom: 1rem;
+    }
+
+    code {
+      background: #e9ecef;
+      padding: 0.3rem 0.5rem;
+      border-radius: 5px;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    footer {
+      background: #343a40;
+      color: #dee2e6;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.9rem;
+      border-top: 4px solid var(--primary);
+      margin-top: 2rem;
+    }
+
+    canvas#graficoFuncao {
+      max-width: 100%;
+      height: 400px;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cálculo Numérico</h1>
+  </header>
+
+  <nav>
+    <a onclick="mostrarSecao('introducao')">Introdução</a>
+    <a onclick="mostrarSecao('bolzano')">Teorema de Bolzano</a>
+    <a onclick="mostrarSecao('bissecao')">Bisseção</a>
+    <a onclick="mostrarSecao('falsa-posicao')">Falsa Posição</a>
+    <a onclick="mostrarSecao('newton')">Newton-Raphson</a>
+    <a onclick="mostrarSecao('erro')">Erro</a>
+  </nav>
+  <main>
+    <section id="introducao" class="active">
+  <h2>Introdução ao Cálculo Numérico</h2>
+  <p>O Cálculo Numérico é uma área da matemática aplicada que desenvolve e analisa algoritmos para resolver problemas matemáticos de forma aproximada. É especialmente útil quando não há soluções analíticas viáveis ou quando é necessário usar computadores para obter resultados.</p>
+  <p>Com o avanço da tecnologia, o cálculo numérico se tornou fundamental em áreas como engenharia, ciências da computação, economia, física e estatística. Ele permite encontrar raízes de equações, resolver sistemas lineares, integrar funções e muito mais, com alta precisão e eficiência.</p>
+  <p>Este site apresenta os principais métodos para encontrar raízes de funções, como Bisseção, Falsa Posição e Newton-Raphson, além de conceitos fundamentais como o Teorema de Bolzano e os tipos de erro numérico.</p>
+
+  <div style="margin-top: 2rem;">
+    <h3 style="color: var(--primary); margin-bottom: 1rem;">🔍 Áreas de Aplicação</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem;">
+      <div style="background: #f1f3f5; border-radius: 8px; padding: 1rem;">
+        <strong>Engenharia</strong>
+        <p style="margin-top: 0.5rem;">Análise estrutural, transferência de calor, escoamento de fluidos e controle de sistemas.</p>
+      </div>
+      <div style="background: #f1f3f5; border-radius: 8px; padding: 1rem;">
+        <strong>Ciência da Computação</strong>
+        <p style="margin-top: 0.5rem;">Algoritmos numéricos, métodos iterativos, interpolação e gráficos computacionais.</p>
+      </div>
+      <div style="background: #f1f3f5; border-radius: 8px; padding: 1rem;">
+        <strong>Economia e Finanças</strong>
+        <p style="margin-top: 0.5rem;">Simulações econômicas, precificação de ativos e análise de risco.</p>
+      </div>
+      <div style="background: #f1f3f5; border-radius: 8px; padding: 1rem;">
+        <strong>Física e Química</strong>
+        <p style="margin-top: 0.5rem;">Modelagem de fenômenos, equações diferenciais e simulações experimentais.</p>
+      </div>
+      <div style="background: #f1f3f5; border-radius: 8px; padding: 1rem;">
+        <strong>Biologia e Medicina</strong>
+        <p style="margin-top: 0.5rem;">Reconstrução de imagens médicas, análises genômicas e sistemas biológicos.</p>
+      </div>
+      <div style="background: #f1f3f5; border-radius: 8px; padding: 1rem;">
+        <strong>IA e Ciência de Dados</strong>
+        <p style="margin-top: 0.5rem;">Regressão, ajuste de curvas e métodos iterativos em aprendizado de máquina.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 2rem;">
+    <h3 style="color: var(--primary);">🎯 Por que estudar Cálculo Numérico?</h3>
+    <p>O Cálculo Numérico é essencial para quem deseja aplicar matemática na solução de problemas reais. Ele aprimora a compreensão dos limites da precisão computacional, desenvolve a habilidade de análise de algoritmos e fornece base sólida para diversas áreas como engenharia, ciência de dados, física aplicada, finanças computacionais e modelagem de sistemas.</p>
+  </div>
+</section>
+<section id="bolzano">
+  <h2>Teorema de Bolzano</h2>
+  <p>O Teorema de Bolzano afirma que, se uma função é contínua em um intervalo fechado e os valores da função nas extremidades desse intervalo possuem sinais opostos (um positivo e o outro negativo), então existe pelo menos uma raiz dentro desse intervalo.</p>
+  <p>Esse princípio é muito útil para confirmar a existência de uma solução em equações não lineares antes de aplicar métodos numéricos como bisseção ou falsa posição.</p>
+
+  <h3 style="margin-top: 2rem; color: var(--primary);">🔢 Teste interativo do Teorema de Bolzano</h3>
+  <p>Insira uma função <code>f(x)</code> e os valores de <code>a</code> e <code>b</code>. O sistema verificará se há mudança de sinal entre os valores da função nesses pontos, indicando a existência de uma raiz.</p>
+
+  <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <label for="funcao">Função f(x):</label>
+    <input type="text" id="funcao" placeholder="Ex: x^3 - x - 2" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="a">Valor de a:</label>
+    <input type="number" id="a" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="b">Valor de b:</label>
+    <input type="number" id="b" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <button onclick="verificarBolzano()" style="padding: 0.5rem 1rem; background-color: var(--primary); color: white; border: none; border-radius: 5px; margin-top: 0.5rem; cursor: pointer;">Verificar</button>
+
+    <div id="resultado-bolzano" style="margin-top: 1rem; font-weight: bold;"></div>
+  </div>
+</section>
+<section id="bissecao">
+  <h2>Método da Bisseção</h2>
+  <p>O método da bisseção é uma técnica iterativa utilizada para encontrar raízes de funções. Ele parte de um intervalo [a, b] onde a função muda de sinal (ou seja, a função em a e b possui sinais opostos), e divide esse intervalo ao meio repetidamente até encontrar uma aproximação para a raiz.</p>
+
+  <h3 style="margin-top: 2rem; color: var(--primary);">🧮 Calculadora de Bisseção</h3>
+  <p>Digite a função, os valores de a e b, e a quantidade de iterações desejada. O sistema executará o processo da bisseção passo a passo.</p>
+
+  <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <label for="funcao-bissecao">Função f(x):</label>
+    <input type="text" id="funcao-bissecao" placeholder="Ex: x^3 - x - 2" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="a-bissecao">Valor de a:</label>
+    <input type="number" id="a-bissecao" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="b-bissecao">Valor de b:</label>
+    <input type="number" id="b-bissecao" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="iteracoes-bissecao">Número de iterações:</label>
+    <input type="number" id="iteracoes-bissecao" value="5" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <button onclick="executarBissecao()" style="padding: 0.5rem 1rem; background-color: var(--primary); color: white; border: none; border-radius: 5px; margin-top: 0.5rem; cursor: pointer;">Calcular</button>
+
+    <div id="resultado-bissecao" style="margin-top: 1rem;"></div>
+  </div>
+</section>
+<section id="falsa-posicao">
+  <h2>Método da Falsa Posição</h2>
+  <p>Esse método usa uma linha reta para aproximar a raiz da função, com base nos extremos do intervalo [a, b] onde a função muda de sinal. A fórmula fornece um ponto de interseção que será usado como nova estimativa da raiz.</p>
+
+  <h3 style="margin-top: 2rem; color: var(--primary);">📈 Calculadora da Falsa Posição</h3>
+  <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <label for="funcao-falsa">Função f(x):</label>
+    <input type="text" id="funcao-falsa" placeholder="Ex: x^3 - x - 2" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+    
+    <label for="a-falsa">Valor de a:</label>
+    <input type="number" id="a-falsa" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+    
+    <label for="b-falsa">Valor de b:</label>
+    <input type="number" id="b-falsa" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+    
+    <label for="iteracoes-falsa">Número de iterações:</label>
+    <input type="number" id="iteracoes-falsa" value="5" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+    
+    <button onclick="executarFalsaPosicao()" style="padding: 0.5rem 1rem; background-color: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">Calcular</button>
+    <div id="resultado-falsa" style="margin-top: 1rem;"></div>
+  </div>
+</section>
+<section id="newton">
+  <h2>Método de Newton-Raphson</h2>
+  <p>Esse método utiliza a derivada da função para encontrar sucessivas aproximações da raiz. É muito eficiente quando a função e sua derivada são conhecidas.</p>
+
+  <h3 style="margin-top: 2rem; color: var(--primary);">🧠 Calculadora de Newton-Raphson</h3>
+  <div style="background: #f8f9fa; padding: 1rem; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <label for="funcao-newton">Função f(x):</label>
+    <input type="text" id="funcao-newton" placeholder="Ex: x^3 - x - 2" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="derivada-newton">Derivada f'(x):</label>
+    <input type="text" id="derivada-newton" placeholder="Ex: 3*x^2 - 1" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="x0-newton">Valor inicial x₀:</label>
+    <input type="number" id="x0-newton" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <label for="iteracoes-newton">Número de iterações:</label>
+    <input type="number" id="iteracoes-newton" value="5" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+
+    <button onclick="executarNewton()" style="padding: 0.5rem 1rem; background-color: var(--primary); color: white; border: none; border-radius: 5px; cursor: pointer;">Calcular</button>
+    <div id="resultado-newton" style="margin-top: 1rem;"></div>
+  </div>
+</section>
+<section id="erro">
+  <h2>Erro em Métodos Numéricos</h2>
+  <p>Os métodos numéricos aproximam o valor da raiz, e por isso é fundamental medir a precisão dessas aproximações. Os principais tipos de erro são:</p>
+  <ul>
+    <li><strong>Erro absoluto:</strong> diferença entre a raiz real e a aproximação atual.</li>
+    <li><strong>Erro relativo:</strong> erro absoluto dividido pela aproximação.</li>
+    <li><strong>Erro estimado:</strong> diferença entre as duas últimas aproximações feitas.</li>
+  </ul>
+  <h3 style="margin-top: 2rem; color: var(--primary);">📊 Erros da última operação</h3>
+  <div id="resultado-erros" style="margin-top: 1rem; font-weight: bold;"></div>
+  <button onclick="limparErros()" style="margin-top:1rem; padding: 0.5rem 1rem; background-color: var(--gray); color: white; border: none; border-radius: 5px; cursor: pointer;">Limpar histórico</button>
+</section>
+  </main>
+  <footer>
+    <p>&copy; 2025 Cálculo Numérico. Projeto educacional para ensino de métodos numéricos.</p>
+  </footer>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.1/math.min.js"></script>
+  
+
+  <script>
+    let ultimoX = null;
+    let penultimoX = null;
+
+    function salvarIteracao(xAnterior, xAtual) {
+      penultimoX = xAnterior;
+      ultimoX = xAtual;
+    }
+
+    function mostrarErros() {
+      const saida = document.getElementById("resultado-erros");
+      if (ultimoX === null || penultimoX === null) {
+        saida.innerHTML = "<p style='color:red;'>Nenhuma operação foi realizada ainda.</p>";
+        return;
+      }
+      const erroAbs = Math.abs(ultimoX - penultimoX);
+      const erroRel = erroAbs / Math.abs(ultimoX);
+      const erroEst = erroAbs;
+      saida.innerHTML = `
+        <p>Última aproximação: <strong>${ultimoX.toFixed(6)}</strong></p>
+        <p>Penúltima aproximação: <strong>${penultimoX.toFixed(6)}</strong></p>
+        <p><strong>Erro absoluto:</strong> ${erroAbs.toExponential(4)}</p>
+        <p><strong>Erro relativo:</strong> ${erroRel.toExponential(4)}</p>
+        <p><strong>Erro estimado:</strong> ${erroEst.toExponential(4)}</p>
+      `;
+    }
+
+    function limparErros() {
+      ultimoX = null;
+      penultimoX = null;
+      document.getElementById("resultado-erros").innerHTML = "<p style='color:gray;'>Histórico de erros limpo.</p>";
+    }
+
+    function mostrarSecao(id) {
+      const secoes = document.querySelectorAll('main section');
+      const secaoAlvo = document.getElementById(id);
+      secoes.forEach(secao => secao.classList.remove('active'));
+      secaoAlvo.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (id === 'erro') mostrarErros();
+    }
+
+    function verificarBolzano() {
+      const funcStr = document.getElementById('funcao').value;
+      const a = parseFloat(document.getElementById('a').value);
+      const b = parseFloat(document.getElementById('b').value);
+      const resultado = document.getElementById('resultado-bolzano');
+      if (isNaN(a) || isNaN(b) || !funcStr) {
+        resultado.textContent = 'Por favor, preencha todos os campos corretamente.';
+        resultado.style.color = 'red';
+        return;
+      }
+      try {
+        const f = math.compile(funcStr);
+        const fa = f.evaluate({ x: a });
+        const fb = f.evaluate({ x: b });
+        const produto = fa * fb;
+        let mensagem = `f(${a}) = ${fa.toFixed(4)}, f(${b}) = ${fb.toFixed(4)} => f(a) * f(b) = ${(produto).toFixed(4)}<br>`;
+        mensagem += (produto < 0)
+          ? '<span style="color: green">Há pelo menos uma raiz no intervalo, pois f(a) e f(b) possuem sinais opostos.</span>'
+          : '<span style="color: red">Não é possível garantir a existência de uma raiz, pois f(a) e f(b) não possuem sinais opostos.</span>';
+        resultado.innerHTML = mensagem;
+      } catch (error) {
+        resultado.textContent = 'Erro ao interpretar a função. Verifique a expressão.';
+        resultado.style.color = 'red';
+      }
+    }
+
+function executarBissecao() {
+  const funcStr = document.getElementById('funcao-bissecao').value;
+  let a = parseFloat(document.getElementById('a-bissecao').value);
+  let b = parseFloat(document.getElementById('b-bissecao').value);
+  const n = parseInt(document.getElementById('iteracoes-bissecao').value);
+  const cont = document.getElementById('resultado-bissecao');
+
+  if (!funcStr || isNaN(a) || isNaN(b) || isNaN(n)) {
+    cont.innerHTML = '<p style="color:red">Preencha todos os campos corretamente.</p>';
+    return;
+  }
+
+  const f = math.compile(funcStr);
+  let m = null;
+  let html = '<table style="width:100%; border-collapse: collapse; margin-top:1rem;">'
+           + '<tr style="background:#007BFF;color:white;"><th>a</th><th>b</th><th>m</th><th>f(m)</th></tr>';
+
+  for (let i = 0; i < n; i++) {
+    m = (a + b) / 2;
+    const fm = f.evaluate({ x: m });
+    html += `<tr style="border-bottom:1px solid #ccc;">
+               <td>${a.toFixed(4)}</td>
+               <td>${b.toFixed(4)}</td>
+               <td>${m.toFixed(4)}</td>
+               <td>${fm.toFixed(6)}</td>
+             </tr>`;
+    if (f.evaluate({ x: a }) * fm < 0) {
+      b = m;
+    } else {
+      a = m;
+    }
+  }
+
+  html += '</table>';
+  html = `<p style="font-weight:bold; margin-top:1rem;">Raiz aproximada: <span style="color:green;">${m.toFixed(6)}</span></p>` + html;
+  cont.innerHTML = html;
+}
+
+
+
+
+function executarFalsaPosicao() {
+  const funcStr = document.getElementById('funcao-falsa').value;
+  let a = parseFloat(document.getElementById('a-falsa').value);
+  let b = parseFloat(document.getElementById('b-falsa').value);
+  const n = parseInt(document.getElementById('iteracoes-falsa').value);
+  const resultado = document.getElementById('resultado-falsa');
+
+  if (!funcStr || isNaN(a) || isNaN(b) || isNaN(n)) {
+    resultado.innerHTML = '<p style="color:red">Preencha todos os campos corretamente.</p>';
+    return;
+  }
+
+  try {
+    const f = math.compile(funcStr);
+    const fa0 = f.evaluate({ x: a });
+    const fb0 = f.evaluate({ x: b });
+
+    if (fa0 * fb0 > 0) {
+      resultado.innerHTML = `<p style="color:red;">f(a) e f(b) não possuem sinais opostos. O método da Falsa Posição não pode ser aplicado.</p>`;
+      return;
+    }
+
+    let output = '';
+    let tabela = '<table style="width:100%; border-collapse: collapse; margin-top: 1rem;">';
+    tabela += '<tr style="background:#007BFF; color:white;"><th>a</th><th>b</th><th>x</th><th>f(x)</th></tr>';
+
+    let xAtual = null;
+    let xAnterior = null;
+
+    for (let i = 0; i < n; i++) {
+      const fa = f.evaluate({ x: a });
+      const fb = f.evaluate({ x: b });
+      const x = (a * fb - b * fa) / (fb - fa);
+      const fx = f.evaluate({ x });
+
+      tabela += `<tr style="border-bottom:1px solid #ccc;">
+        <td>${a.toFixed(4)}</td>
+        <td>${b.toFixed(4)}</td>
+        <td>${x.toFixed(4)}</td>
+        <td>${fx.toFixed(6)}</td>
+      </tr>`;
+
+      if (fa * fx < 0) {
+        b = x;
+      } else {
+        a = x;
+      }
+
+      if (i === n - 2) xAnterior = x;
+      if (i === n - 1) xAtual = x;
+    }
+
+    penultimoX = xAnterior;
+    ultimoX = xAtual;
+
+    tabela += '</table>';
+
+    output += `<p style="font-weight:bold; margin-bottom: 1rem;">Raiz aproximada após ${n} iterações: <span style="color:green;">${xAtual.toFixed(6)}</span></p>`;
+    output += tabela;
+
+    resultado.innerHTML = output;
+  } catch (e) {
+    resultado.innerHTML = '<p style="color:red;">Erro ao interpretar a função. Verifique a expressão.</p>';
+  }
+}
+
+function executarNewton() {
+  const funcStr = document.getElementById('funcao-newton').value;
+  const derivStr = document.getElementById('derivada-newton').value;
+  let x = parseFloat(document.getElementById('x0-newton').value);
+  const n = parseInt(document.getElementById('iteracoes-newton').value);
+  const resultado = document.getElementById('resultado-newton');
+
+  if (!funcStr || !derivStr || isNaN(x) || isNaN(n)) {
+    resultado.innerHTML = '<p style="color:red;">Preencha todos os campos corretamente.</p>';
+    return;
+  }
+
+  try {
+    const f = math.compile(funcStr);
+    const df = math.compile(derivStr);
+
+    let output = '';
+    let tabela = '<table style="width:100%; border-collapse: collapse; margin-top: 1rem;">';
+    tabela += '<tr style="background:#007BFF; color:white;"><th>x</th><th>f(x)</th><th>f\'(x)</th></tr>';
+
+    let xAnterior = null;
+
+    for (let i = 0; i < n; i++) {
+      const fx = f.evaluate({ x });
+      const dfx = df.evaluate({ x });
+
+      if (!isFinite(fx) || !isFinite(dfx)) {
+        resultado.innerHTML = `<p style="color:red;">Função ou derivada não definida em x = ${x.toFixed(4)}. Interrompendo cálculo.</p>`;
+        return;
+      }
+
+      if (Math.abs(dfx) < 1e-8) {
+        resultado.innerHTML = `<p style="color:red;">Derivada muito próxima de zero em x = ${x.toFixed(4)}. O método não pode continuar.</p>`;
+        return;
+      }
+
+      tabela += `<tr style="border-bottom:1px solid #ccc;">
+        <td>${x.toFixed(4)}</td>
+        <td>${fx.toFixed(6)}</td>
+        <td>${dfx.toFixed(6)}</td>
+      </tr>`;
+
+      if (i === n - 2) penultimoX = x;
+      xAnterior = x;
+      x = x - fx / dfx;
+      if (i === n - 1) ultimoX = x;
+    }
+
+    tabela += '</table>';
+    output += `<p style="font-weight:bold; margin-bottom: 1rem;">Raiz aproximada após ${n} iterações: <span style="color:green;">${ultimoX.toFixed(6)}</span></p>`;
+    output += tabela;
+
+    resultado.innerHTML = output;
+    
+  } catch (e) {
+    resultado.innerHTML = '<p style="color:red;">Erro ao processar a função ou derivada. Verifique as expressões digitadas.</p>';
+  }
+}
+
+  </script>
+
+</body>
+</html>
