@@ -1,0 +1,7 @@
+{
+  "name": "calc-numerico",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "vercel dev"
+  }
+}
